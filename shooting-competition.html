@@ -176,7 +176,7 @@
   .filter-btn:hover, .filter-btn.active { border-color:var(--accent); color:var(--accent); }
 
   /* ── STANDINGS ── */
-  .standings-table { width:100%; border-collapse:collapse; font-size:.9rem; }
+  .standings-table { width:100%; border-collapse:collapse; font-size:.9rem; min-width:max-content; }
   .standings-table th {
     font-family:'Barlow Condensed',sans-serif; font-size:.7rem; font-weight:600; letter-spacing:.18em; text-transform:uppercase;
     color:var(--muted); padding:.6rem 1rem; text-align:left; border-bottom:1px solid var(--border);
@@ -190,7 +190,11 @@
   .rank-1 { color:var(--gold); } .rank-2 { color:var(--silver); } .rank-3 { color:var(--bronze); }
   .team-name-cell { font-weight:600; }
   .team-members-cell { font-size:.75rem; color:var(--muted); }
-  .pts-cell { font-family:'Bebas Neue',sans-serif; font-size:1.3rem; letter-spacing:.05em; color:var(--accent); text-align:right; }
+  .pts-cell { font-family:'Bebas Neue',sans-serif; font-size:1.3rem; letter-spacing:.05em; color:var(--accent); text-align:right; vertical-align:middle; }
+  .pts-wrap { display:inline-flex; flex-direction:column; align-items:flex-end; gap:2px; }
+  .pts-badges { display:flex; gap:0; flex-wrap:wrap; justify-content:flex-end; }
+  .pts-badges span { margin-right:0 !important; margin-left:3px; }
+  .pts-value { line-height:1; }
 
   /* ── CHAMPION ── */
   .champion-banner { background:linear-gradient(135deg,rgba(245,200,66,.08),rgba(200,255,0,.05)); border:1px solid rgba(245,200,66,.3); border-radius:4px; padding:2rem; text-align:center; margin-bottom:2rem; }
@@ -1181,11 +1185,11 @@ function standingsTableHTML(rows) {
       `<td class="num tally-col">${r.scoreCounts[v] || 0}</td>`).join('');
     return `<tr${tied ? ' class="tied-row"' : ''}>
       <td class="rank-cell ${rc}">${i+1}</td>
-      <td><div class="team-name-cell">${esc(r.name)}</div><div class="team-members-cell">${esc(r.p1)} · ${esc(r.p2)}</div></td>
+      <td><div class="team-name-cell">${esc(r.name)}</div><div class="team-members-cell">${esc(r.p1)}<br>${esc(r.p2)}</div></td>
       <td class="num">${r.played}</td><td class="num">${r.w}</td>
       <td class="num">${r.d}</td><td class="num">${r.l}</td>
       ${counts}
-      <td class="pts-cell">${badge}${r.pts}</td>
+      <td class="pts-cell"><div class="pts-wrap">${badge ? `<span class="pts-badges">${badge}</span>` : ''}<span class="pts-value">${r.pts}</span></div></td>
     </tr>`;
   }).join('');
 
@@ -1213,7 +1217,7 @@ function makeStandingsLabel(text, color) {
 function makeStandingsCard(rows, extraStyle) {
   const el = document.createElement('div');
   el.className = 'card';
-  el.style.cssText = 'padding:0;overflow:hidden;' + (extraStyle||'');
+  el.style.cssText = 'padding:0;overflow-x:auto;' + (extraStyle||'');
   el.innerHTML = standingsTableHTML(rows);
   return el;
 }
