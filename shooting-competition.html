@@ -185,7 +185,7 @@
   .standings-table td { padding:.75rem 1rem; border-bottom:1px solid var(--border); }
   .standings-table td.num { text-align:right; font-variant-numeric:tabular-nums; }
   .standings-table tr:last-child td { border-bottom:none; }
-  .standings-table tr:hover td { background:var(--surface2); }
+
   .rank-cell { font-family:'Bebas Neue',sans-serif; font-size:1.1rem; letter-spacing:.05em; width:40px; }
   .rank-1 { color:var(--gold); } .rank-2 { color:var(--silver); } .rank-3 { color:var(--bronze); }
   .team-name-cell { font-weight:600; }
@@ -208,6 +208,7 @@
     background:var(--bg); flex-direction:column; align-items:center; justify-content:center; overflow:hidden;
   }
   .focus-mode-overlay.active { display:flex; }
+  .focus-mode-overlay { overscroll-behavior:contain; }
   .focus-header {
     position:absolute; top:0; left:0; right:0; z-index:2;
     display:flex; align-items:center; justify-content:space-between;
@@ -351,7 +352,7 @@
   }
   .h2h-note .undecided-badge { margin-left:0; }
   .h2h-note .win-badge { margin-left:0; }
-  .standings-table tr.tied-row td { background:rgba(255,107,43,.05); }
+  /* tied rows no longer tinted — the X badge is the indicator */
   .standings-scroll { overflow-x:auto; }
   .tally-col { background:rgba(200,255,0,.06); font-size:.8rem; }
   body.light .tally-col { background:rgba(74,124,0,.06); }
@@ -398,7 +399,6 @@
     .standings-table { font-size:11pt; }
     .standings-table th, .standings-table td { border-bottom:1px solid #ccc !important; padding:.4rem .6rem; }
     .standings-table tr:hover td { background:none !important; }
-    .standings-table tr.tied-row td { background:#f3f3f3 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
     .tally-col { background:#f7f7f7 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
     .pts-cell { color:#000 !important; }
     .rank-1, .rank-2, .rank-3 { color:#000 !important; }
@@ -421,6 +421,13 @@
     .match-team.right { text-align:center; }
     .score-input { width:3rem !important; }
     .teams-grid { grid-template-columns:1fr; }
+    /* Focus header: make everything fit on a narrow phone */
+    .focus-header { padding:.7rem 1rem; gap:.4rem; }
+    .focus-logo { display:none; }                /* hide decorative logo */
+    .focus-counter { font-size:.7rem; letter-spacing:.1em; }
+    .focus-header-actions .btn-label { display:none; }  /* icon-only buttons */
+    .focus-header-actions .btn-sm { padding:.45rem .7rem; }
+    .backup-indicator { font-size:.62rem; padding:2px 6px; letter-spacing:.05em; }
   }
 </style>
 </head>
@@ -512,10 +519,10 @@
     <div class="focus-header">
       <div class="focus-logo">SHOOT<span>COMP</span></div>
       <div class="focus-counter" id="focusCounter"></div>
-      <div class="flex gap-1 align-center">
+      <div class="flex gap-1 align-center focus-header-actions">
         <span id="backupIndicator" class="backup-indicator"></span>
-        <button class="btn btn-secondary btn-sm" onclick="exportTournament(activeTournamentId)" title="Záloha (export)">&#8595; Záloha</button>
-        <button class="btn btn-secondary btn-sm" onclick="closeFocusMode()">✕ Ukončit režim</button>
+        <button class="btn btn-secondary btn-sm" onclick="exportTournament(activeTournamentId)" title="Záloha (export)">&#8595;<span class="btn-label"> Záloha</span></button>
+        <button class="btn btn-secondary btn-sm" onclick="closeFocusMode()" title="Ukončit režim">✕<span class="btn-label"> Ukončit režim</span></button>
       </div>
     </div>
     <div id="focusContent" style="width:100%;display:flex;justify-content:center;"></div>
@@ -925,11 +932,13 @@ function openFocusMode() {
   focusCursor = state.matches.findIndex(m => !m.done);
   if (focusCursor === -1) focusCursor = state.matches.length - 1;
   document.getElementById('focusOverlay').classList.add('active');
+  document.body.style.overflow = 'hidden';   // lock page scroll behind overlay
   renderFocusMatch();
 }
 
 function closeFocusMode() {
   document.getElementById('focusOverlay').classList.remove('active');
+  document.body.style.overflow = '';          // restore page scroll
   renderMatches();
 }
 
