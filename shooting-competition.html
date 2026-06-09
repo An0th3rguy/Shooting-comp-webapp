@@ -352,6 +352,7 @@
   .h2h-note .undecided-badge { margin-left:0; }
   .h2h-note .win-badge { margin-left:0; }
   .standings-table tr.tied-row td { background:rgba(255,107,43,.05); }
+  .standings-scroll { overflow-x:auto; }
   .tally-col { background:rgba(200,255,0,.06); font-size:.8rem; }
   body.light .tally-col { background:rgba(74,124,0,.06); }
   .h2h-note {
@@ -1177,7 +1178,7 @@ function standingsTableHTML(rows) {
     const tied = ptsCount[r.pts] > 1;
     if (tied) hasTie = true;
     const badge = tied
-      ? '<span class="h2h-badge" title="Shodné skóre – pořadí určeno vzájemnými souboji">H2H</span>'
+      ? '<span class="h2h-badge" title="Shodné skóre – pořadí určeno vzájemnými souboji">X</span>'
         + (r.tieDecidedBy !== null ? `<span class="win-badge" title="Shodné skóre i vzájemné souboje – rozhodl počet zásahů ${r.tieDecidedBy}">${r.tieDecidedBy}</span>` : '')
         + (r.undecided ? '<span class="undecided-badge" title="Nelze rozhodnout – týmy jsou shodné ve skóre, vzájemných soubojích i počtu 7,6,5,4,3,2,1,0">?</span>' : '')
       : '';
@@ -1193,18 +1194,23 @@ function standingsTableHTML(rows) {
     </tr>`;
   }).join('');
 
-  const hasNumDecided = rows.some(r => r.tieDecidedBy !== null && ptsCount[r.pts] > 1);
-  const hasUndecided  = rows.some(r => r.undecided && ptsCount[r.pts] > 1);
-  const footnote = hasTie
-    ? `<div class="h2h-note"><span class="h2h-badge">H2H</span> Shodné skóre – pořadí určeno podle vzájemných soubojů.</div>`
-      + (hasNumDecided ? `<div class="h2h-note"><span class="win-badge">7</span> Shodné skóre i vzájemné souboje – rozhodl počet zásahů dané hodnoty (číslo udává rozhodující hodnotu).</div>` : '')
-      + (hasUndecided ? `<div class="h2h-note"><span class="undecided-badge">?</span> Nelze rozhodnout – týmy jsou shodné ve skóre, vzájemných soubojích i počtu 7,6,5,4,3,2,1,0.</div>` : '')
-    : '';
-
   return `<table class="standings-table">
     <thead><tr><th>#</th><th>Tým</th><th class="num">Odstříleno</th><th class="num">V</th><th class="num">R</th><th class="num">P</th><th class="num tally-col">7×</th><th class="num tally-col">6×</th><th class="num tally-col">5×</th><th class="num tally-col">4×</th><th class="num tally-col">3×</th><th class="num tally-col">2×</th><th class="num tally-col">1×</th><th class="num tally-col">0×</th><th class="num">Skóre</th></tr></thead>
     <tbody>${tbody}</tbody>
-  </table>${footnote}`;
+  </table>`;
+}
+
+// Footnote/legend (rendered OUTSIDE the horizontal scroll area)
+function standingsFootnoteHTML(rows) {
+  const ptsCount = {};
+  rows.forEach(r => { ptsCount[r.pts] = (ptsCount[r.pts] || 0) + 1; });
+  const hasTie        = rows.some(r => ptsCount[r.pts] > 1);
+  const hasNumDecided = rows.some(r => r.tieDecidedBy !== null && ptsCount[r.pts] > 1);
+  const hasUndecided  = rows.some(r => r.undecided && ptsCount[r.pts] > 1);
+  if (!hasTie) return '';
+  return `<div class="h2h-note"><span class="h2h-badge">X</span> Shodné skóre – pořadí určeno podle vzájemných soubojů.</div>`
+    + (hasNumDecided ? `<div class="h2h-note"><span class="win-badge">7</span> Shodné skóre i vzájemné souboje – rozhodl počet zásahů dané hodnoty (číslo udává rozhodující hodnotu).</div>` : '')
+    + (hasUndecided ? `<div class="h2h-note"><span class="undecided-badge">?</span> Nelze rozhodnout – týmy jsou shodné ve skóre, vzájemných soubojích i počtu 7,6,5,4,3,2,1,0.</div>` : '');
 }
 
 function makeStandingsLabel(text, color) {
@@ -1217,8 +1223,9 @@ function makeStandingsLabel(text, color) {
 function makeStandingsCard(rows, extraStyle) {
   const el = document.createElement('div');
   el.className = 'card';
-  el.style.cssText = 'padding:0;overflow-x:auto;' + (extraStyle||'');
-  el.innerHTML = standingsTableHTML(rows);
+  el.style.cssText = 'padding:0;overflow:hidden;' + (extraStyle||'');
+  // Only the table scrolls horizontally; the footnote stays fixed below it.
+  el.innerHTML = `<div class="standings-scroll">${standingsTableHTML(rows)}</div>${standingsFootnoteHTML(rows)}`;
   return el;
 }
 
