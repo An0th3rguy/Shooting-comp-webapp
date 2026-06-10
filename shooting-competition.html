@@ -426,7 +426,16 @@
     .focus-logo { display:none; }                /* hide decorative logo */
     .focus-counter { font-size:.7rem; letter-spacing:.1em; }
     .focus-header-actions .btn-label { display:none; }  /* icon-only buttons */
-    .focus-header-actions .btn-sm { padding:.45rem .7rem; }
+    .focus-header-actions .btn-sm {
+      padding:0 !important; width:2.4rem !important; min-width:2.4rem !important;
+      max-width:2.4rem !important; height:2.4rem !important; box-sizing:border-box !important;
+      font-size:1.05rem !important;
+      flex:0 0 auto;
+      display:inline-flex !important; align-items:center !important; justify-content:center !important;
+    }
+    .focus-header-actions .btn-icon { display:block; line-height:1; }
+    /* the ✕ glyph has uneven side-bearing; nudge it right to visually centre */
+    .focus-header-actions button[onclick*="closeFocusMode"] .btn-icon { transform:translateX(1.5px); }
     .backup-indicator { font-size:.62rem; padding:2px 6px; letter-spacing:.05em; }
   }
 </style>
@@ -521,8 +530,8 @@
       <div class="focus-counter" id="focusCounter"></div>
       <div class="flex gap-1 align-center focus-header-actions">
         <span id="backupIndicator" class="backup-indicator"></span>
-        <button class="btn btn-secondary btn-sm" onclick="exportTournament(activeTournamentId)" title="Záloha (export)">&#8595;<span class="btn-label"> Záloha</span></button>
-        <button class="btn btn-secondary btn-sm" onclick="closeFocusMode()" title="Ukončit režim">✕<span class="btn-label"> Ukončit režim</span></button>
+        <button class="btn btn-secondary btn-sm" onclick="exportTournament(activeTournamentId)" title="Záloha (export)"><span class="btn-icon">&#8595;</span><span class="btn-label"> Záloha</span></button>
+        <button class="btn btn-secondary btn-sm" onclick="closeFocusMode()" title="Ukončit režim"><span class="btn-icon">✕</span><span class="btn-label"> Ukončit režim</span></button>
       </div>
     </div>
     <div id="focusContent" style="width:100%;display:flex;justify-content:center;"></div>
@@ -1193,7 +1202,7 @@ function standingsTableHTML(rows) {
       : '';
     const counts = [7,6,5,4,3,2,1,0].map(v =>
       `<td class="num tally-col">${r.scoreCounts[v] || 0}</td>`).join('');
-    return `<tr${tied ? ' class="tied-row"' : ''}>
+    return `<tr>
       <td class="rank-cell ${rc}">${i+1}</td>
       <td><div class="team-name-cell">${esc(r.name)}</div><div class="team-members-cell">${esc(r.p1)}<br>${esc(r.p2)}</div></td>
       <td class="num">${r.played}</td><td class="num">${r.w}</td>
