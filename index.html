@@ -416,17 +416,13 @@
     /* Round labels */
     #standingsContainer > div { color:#000 !important; }
 
-    /* Prevent a team row from splitting across two pages.
-       WebKit/Safari ignores break-inside on <tr>, so we also apply it to
-       <td> and disable border-collapse (which blocks row break-avoid). */
-    .standings-table { border-collapse:separate !important; border-spacing:0 !important; }
-    .standings-table tr, .standings-table td, .standings-table th {
-      break-inside:avoid !important; page-break-inside:avoid !important;
-    }
+    /* Prevent a team row from splitting across two pages */
+    .standings-table tr { break-inside:avoid; page-break-inside:avoid; }
     .standings-table thead { display:table-header-group; }   /* repeat header each page */
+    .standings-table tfoot { display:table-footer-group; }
+    /* keep each standings block (label + its table) together where possible */
     .standings-scroll { overflow:visible !important; }
     .h2h-note { break-inside:avoid; page-break-inside:avoid; }
-    .card { break-inside:avoid-page; }
   }
 
   /* ── RESPONSIVE ── */
