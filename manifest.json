@@ -1,6 +1,6 @@
 {
-  "name": "Střelecká soutěž",
-  "short_name": "Soutěž",
+  "name": "ShootComp",
+  "short_name": "ShootComp",
   "description": "Správa střeleckých závodů – souboje, výsledky, zálohy. Funguje offline.",
   "start_url": "./",
   "scope": "./",
