@@ -57,14 +57,14 @@
   @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
 
   .theme-toggle {
-    display:flex; align-items:center; gap:6px;
-    padding:4px 10px 4px 6px; background:none;
-    border:1px solid var(--border); border-radius:20px;
-    color:var(--muted); cursor:pointer; white-space:nowrap;
-    font-family:'Barlow Condensed',sans-serif; font-size:.72rem; font-weight:600; letter-spacing:.12em; text-transform:uppercase;
-    transition: border-color .2s, color .2s;
+    display:inline-flex; align-items:center; justify-content:center;
+    width:2rem; height:2rem; padding:0; background:none;
+    border:1px solid var(--border); border-radius:50%;
+    color:var(--muted); cursor:pointer; font-size:1rem; line-height:1;
+    transition: border-color .2s, color .2s; flex-shrink:0;
   }
   .theme-toggle:hover { border-color:var(--accent); color:var(--accent); }
+  #themeLabel { display:none; }
 
   /* ── TABS ── */
   .nav-tabs { display:flex; overflow-x:auto; padding:0 2rem; background:var(--surface); border-bottom:1px solid var(--border); }
@@ -125,6 +125,15 @@
   .team-count-row > div { flex:0 0 auto; }
   .teams-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:1rem; }
   .team-card { background:var(--surface2); border:1px solid var(--border); border-radius:4px; padding:1.2rem; }
+  .team-card-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:.8rem; }
+  .team-card-head .team-number { margin-bottom:0; }
+  .team-remove {
+    background:none; border:1px solid var(--border); border-radius:50%;
+    width:1.5rem; height:1.5rem; line-height:1; font-size:1rem;
+    color:var(--muted); cursor:pointer; display:inline-flex; align-items:center; justify-content:center;
+    transition:border-color .2s, color .2s; flex-shrink:0;
+  }
+  .team-remove:hover { border-color:var(--accent2); color:var(--accent2); }
   .team-number { font-family:'Bebas Neue',sans-serif; font-size:.9rem; letter-spacing:.15em; color:var(--accent); margin-bottom:.8rem; }
   .team-fields { display:flex; flex-direction:column; gap:.6rem; }
 
@@ -366,16 +375,45 @@
   }
   .h2h-note .h2h-badge { margin-left:0; }
 
+  /* ── HEADER ACTIONS + INFO ── */
+  .header-actions { display:flex; align-items:center; gap:.6rem; }
+  .info-btn {
+    background:none; border:1px solid var(--border); border-radius:50%;
+    color:var(--muted); cursor:pointer; width:2rem; height:2rem;
+    font-size:1rem; line-height:1; display:inline-flex; align-items:center; justify-content:center;
+    transition:border-color .2s, color .2s; flex-shrink:0;
+  }
+  .info-btn:hover { border-color:var(--accent); color:var(--accent); }
+
+  /* ── ABOUT MODAL ── */
+  .about-box { max-width:420px; text-align:left; }
+  .about-head {
+    display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;
+    position:sticky; top:-1.6rem; background:var(--surface);
+    padding-top:.4rem; margin-top:-.4rem; z-index:1;
+  }
+  .about-title { font-family:'Bebas Neue',sans-serif; font-size:1.5rem; letter-spacing:.12em; color:var(--accent); }
+  .about-title span { color:var(--text); }
+  .about-desc { font-size:.9rem; color:var(--muted); line-height:1.5; margin-bottom:1.2rem; }
+  .about-rows { border-top:1px solid var(--border); margin-bottom:1.2rem; }
+  .about-row { display:flex; justify-content:space-between; padding:.6rem 0; border-bottom:1px solid var(--border); font-size:.9rem; }
+  .about-row span:first-child { color:var(--muted); }
+  .about-row span:last-child { font-weight:600; }
+  .about-update-status { font-size:.82rem; color:var(--muted); margin-top:.7rem; min-height:1.2em; }
+  .about-note { font-size:.78rem; color:var(--muted); line-height:1.5; margin-bottom:1.2rem; }
+
   /* ── CONFIRM MODAL ── */
   .modal-overlay {
     display:none; position:fixed; inset:0; z-index:300;
     background:rgba(0,0,0,.6); align-items:center; justify-content:center; padding:1.5rem;
+    overflow-y:auto;
     -webkit-backdrop-filter:blur(2px); backdrop-filter:blur(2px);
   }
   .modal-overlay.active { display:flex; }
   .modal-box {
     background:var(--surface); border:1px solid var(--border); border-radius:6px;
     padding:1.6rem 1.6rem 1.3rem; max-width:380px; width:100%;
+    max-height:calc(100vh - 3rem); overflow-y:auto;
     box-shadow:0 12px 48px rgba(0,0,0,.4);
   }
   .modal-msg { font-size:1rem; line-height:1.5; color:var(--text); margin-bottom:1.4rem; }
@@ -457,11 +495,38 @@
 <header>
   <div class="logo">SHOOT<span>COMP</span></div>
   <div class="header-phase" id="headerPhase"><span class="dot"></span>Nastavení</div>
-  <button class="theme-toggle" onclick="toggleTheme()">
-    <span id="themeIcon">🌙</span>
-    <span id="themeLabel">Tmavý</span>
-  </button>
+  <div class="header-actions">
+    <button class="theme-toggle" onclick="toggleTheme()">
+      <span id="themeIcon">🌙</span>
+      <span id="themeLabel">Tmavý</span>
+    </button>
+    <button class="info-btn" onclick="openAbout()" title="O aplikaci" aria-label="O aplikaci">&#9432;</button>
+  </div>
 </header>
+
+<!-- ABOUT MODAL -->
+<div class="modal-overlay" id="aboutModal">
+  <div class="modal-box about-box">
+    <div class="about-head">
+      <div class="about-title">SHOOT<span>COMP</span></div>
+      <button class="btn btn-secondary btn-sm" onclick="closeAbout()">Zavřít</button>
+    </div>
+    <p class="about-desc">Správa střeleckých závodů – souboje, výsledky a zálohy. Funguje offline, data zůstávají ve vašem zařízení.</p>
+    <div class="about-rows">
+      <div class="about-row"><span>Verze</span><span id="aboutVersion">–</span></div>
+      <div class="about-row"><span>Poslední aktualizace</span><span id="aboutDate">–</span></div>
+      <div class="about-row"><span>Perzistentní režim</span><span id="aboutPersist">–</span></div>
+      <div class="about-row"><span>Offline režim</span><span id="aboutOffline">–</span></div>
+      <div class="about-row"><span>Uložené závody</span><span id="aboutCount">–</span></div>
+    </div>
+    <p class="about-note">Offline režim znamená, že je aplikace uložená v zařízení a funguje i bez připojení k internetu.</p>
+    <p class="about-note">Perzistentní režim znamená, že prohlížeč chrání uložená data před automatickým smazáním (např. při nedostatku místa). Pro jistotu je v průběhu závodu potřeba dělat pravidelné zálohy.</p>
+    <div id="aboutUpdateArea">
+      <button class="btn btn-secondary btn-sm" id="aboutUpdateBtn" onclick="checkForUpdate()">Zkontrolovat aktualizace</button>
+      <div class="about-update-status" id="aboutUpdateStatus"></div>
+    </div>
+  </div>
+</div>
 
 <div class="nav-tabs">
   <button class="tab-btn active" id="tab-setup"      onclick="switchTab('setup')">① Nastavení</button>
@@ -504,9 +569,10 @@
       <div class="team-count-row" style="margin-bottom:1rem;">
         <div><label>Počet týmů</label><input type="number" id="teamCount" value="4" min="2" max="40" style="width:7rem"></div>
         <div><label>Počet kol</label><input type="number" id="roundCount" value="1" min="1" max="20" style="width:7rem"></div>
-        <button class="btn btn-secondary btn-sm" onclick="generateTeamInputs()">Generovat týmy</button>
+        <button class="btn btn-secondary btn-sm" onclick="regenerateTeamInputs()">Generovat týmy</button>
       </div>
       <div id="teamsContainer" class="teams-grid"></div>
+      <button class="btn btn-secondary btn-sm add-team-btn" onclick="addTeamInput()" style="margin-top:.8rem;">+ Přidat tým</button>
       <div class="mt-2 flex gap-1">
         <button class="btn btn-primary" id="formStartBtn" onclick="startTournament()">Spustit závod →</button>
         <button class="btn btn-secondary" onclick="hideTournamentForm()">Zrušit</button>
@@ -617,17 +683,66 @@ function generateTeamInputs(existing = []) {
   const n = parseInt(document.getElementById('teamCount').value) || 4;
   if (n < 2 || n > 40) { showAlert('alertSetup','Počet týmů musí být 2–40.'); return; }
   hideAlert('alertSetup');
-  document.getElementById('teamsContainer').innerHTML = Array.from({length:n}, (_, i) => {
-    const p = existing[i] || {};
-    return `<div class="team-card">
-      <div class="team-number">Tým ${i+1}</div>
+  renderTeamInputs(Array.from({length:n}, (_, i) => existing[i] || {}));
+}
+
+// Render team cards from an array of {name,p1,p2} objects.
+function renderTeamInputs(list) {
+  document.getElementById('teamsContainer').innerHTML = list.map((p, i) => `
+    <div class="team-card">
+      <div class="team-card-head">
+        <div class="team-number">Tým ${i+1}</div>
+        <button class="team-remove" onclick="removeTeamInput(${i})" title="Odebrat tým" aria-label="Odebrat tým">&times;</button>
+      </div>
       <div class="team-fields">
         <div><label>Název týmu</label><input type="text" id="tname_${i}" placeholder="Tým ${i+1}" value="${esc(p.name||'')}"></div>
         <div><label>Člen 1</label><input type="text" id="tp1_${i}"   placeholder="Jméno střelce"  value="${esc(p.p1  ||'')}"></div>
         <div><label>Člen 2</label><input type="text" id="tp2_${i}"   placeholder="Jméno střelce"  value="${esc(p.p2  ||'')}"></div>
       </div>
-    </div>`;
-  }).join('');
+    </div>`).join('');
+}
+
+// Read whatever is currently typed into the team cards (without defaults).
+function readCurrentInputs() {
+  const list = [];
+  for (let i = 0; document.getElementById(`tname_${i}`) !== null; i++) {
+    list.push({
+      name: document.getElementById(`tname_${i}`).value,
+      p1:   document.getElementById(`tp1_${i}`).value,
+      p2:   document.getElementById(`tp2_${i}`).value,
+    });
+  }
+  return list;
+}
+
+// "Generovat týmy" — resize to the count box WITHOUT wiping already-typed names.
+function regenerateTeamInputs() {
+  const n = parseInt(document.getElementById('teamCount').value) || 4;
+  if (n < 2 || n > 40) { showAlert('alertSetup','Počet týmů musí být 2–40.'); return; }
+  const current = readCurrentInputs();
+  const list = Array.from({length:n}, (_, i) => current[i] || {});
+  renderTeamInputs(list);
+}
+
+// "+ Přidat tým" — append one more team, keeping all typed names (e.g. a late arrival).
+function addTeamInput() {
+  const current = readCurrentInputs();
+  if (current.length >= 40) { showAlert('alertSetup','Maximální počet týmů je 40.'); return; }
+  current.push({});
+  document.getElementById('teamCount').value = current.length;
+  renderTeamInputs(current);
+  // focus the new team's name field
+  const idx = current.length - 1;
+  setTimeout(() => document.getElementById(`tname_${idx}`)?.focus(), 50);
+}
+
+// Remove one team card, keeping the rest of the typed names.
+function removeTeamInput(index) {
+  const current = readCurrentInputs();
+  if (current.length <= 2) { showAlert('alertSetup','Potřebujete alespoň 2 týmy.'); return; }
+  current.splice(index, 1);
+  document.getElementById('teamCount').value = current.length;
+  renderTeamInputs(current);
 }
 
 function readTeamsFromForm(n) {
@@ -639,7 +754,7 @@ function readTeamsFromForm(n) {
 }
 
 function startTournament() {
-  const n      = parseInt(document.getElementById('teamCount').value) || 4;
+  const n      = readCurrentInputs().length || parseInt(document.getElementById('teamCount').value) || 4;
   const teams  = readTeamsFromForm(n);
   if (teams.length < 2) { showAlert('alertSetup','Potřebujete alespoň 2 týmy.'); return; }
 
@@ -1597,6 +1712,119 @@ function loadTheme() {
 }
 
 // ─────────────────────────────────────────────
+//  ABOUT
+// ─────────────────────────────────────────────
+const APP_VERSION = '1.0.3';
+const APP_DATE = '18.06.2026';
+
+async function openAbout() {
+  document.getElementById('aboutVersion').textContent = APP_VERSION;
+  document.getElementById('aboutDate').textContent = APP_DATE;
+
+  // Saved tournaments count
+  document.getElementById('aboutCount').textContent = String(tournaments.length);
+
+  // Persistent storage status
+  let persist = 'Neaktivní', persistActive = false;
+  try {
+    if (navigator.storage && navigator.storage.persisted) {
+      persistActive = await navigator.storage.persisted();
+      persist = persistActive ? 'Aktivní' : 'Neaktivní';
+    }
+  } catch (e) {}
+  const persistEl = document.getElementById('aboutPersist');
+  persistEl.textContent = persist;
+  persistEl.style.color = persistActive ? 'var(--accent)' : '';
+
+  // Offline status — true when a service worker is active (app cached & works offline)
+  let offlineActive = false;
+  try {
+    if ('serviceWorker' in navigator) {
+      const reg = await navigator.serviceWorker.getRegistration();
+      offlineActive = !!(reg && reg.active);
+    }
+  } catch (e) {}
+  const offlineEl = document.getElementById('aboutOffline');
+  offlineEl.textContent = offlineActive ? 'Aktivní' : 'Neaktivní';
+  offlineEl.style.color = offlineActive ? 'var(--accent)' : '';
+
+  // Update button only meaningful when hosted (https)
+  const area = document.getElementById('aboutUpdateArea');
+  area.style.display = (location.protocol === 'https:') ? '' : 'none';
+  document.getElementById('aboutUpdateStatus').textContent = '';
+
+  document.getElementById('aboutModal').classList.add('active');
+}
+
+function closeAbout() {
+  document.getElementById('aboutModal').classList.remove('active');
+}
+
+let updateTapCount = 0;
+let updateTapTimer = null;
+
+async function checkForUpdate() {
+  const status = document.getElementById('aboutUpdateStatus');
+  const btn = document.getElementById('aboutUpdateBtn');
+  if (!navigator.onLine) { status.textContent = 'Jste offline – aktualizaci nelze ověřit.'; return; }
+  if (!('serviceWorker' in navigator)) { status.textContent = 'Aktualizace nejsou podporovány.'; return; }
+
+  // Hidden escape hatch: 5 taps within a few seconds forces a refresh even if
+  // no new version is detected (use when an update appears stuck).
+  updateTapCount++;
+  clearTimeout(updateTapTimer);
+  updateTapTimer = setTimeout(() => { updateTapCount = 0; }, 3000);
+  const forceRefresh = updateTapCount >= 5;
+  if (forceRefresh) updateTapCount = 0;
+
+  btn.disabled = true;
+  status.textContent = forceRefresh ? 'Vynucuji obnovení…' : 'Kontroluji…';
+  try {
+    const reg = await navigator.serviceWorker.getRegistration();
+    if (!reg) { status.textContent = 'Aplikace zatím není nainstalovaná.'; btn.disabled = false; return; }
+
+    // Re-check sw.js against the network. If the version was bumped, the browser
+    // starts installing a new worker (appears as installing/waiting).
+    await reg.update();
+
+    const hasNewVersion = !!(reg.installing || reg.waiting);
+    if (!hasNewVersion && !forceRefresh) {
+      status.textContent = 'Máte nejnovější verzi.';
+      btn.disabled = false;
+      return;
+    }
+
+    // New version found (or forced) → force-refresh the cached files, then reload.
+    status.textContent = forceRefresh ? 'Vynucuji stažení nové verze…' : 'Stahuji nejnovější verzi…';
+
+    // When the SW signals it has refreshed the cache, reload the page.
+    const onMsg = (event) => {
+      if (event.data && event.data.type === 'CACHE_REFRESHED') {
+        navigator.serviceWorker.removeEventListener('message', onMsg);
+        status.textContent = 'Hotovo, načítám…';
+        location.reload();
+      }
+    };
+    navigator.serviceWorker.addEventListener('message', onMsg);
+
+    // Ask whichever worker is active (or the new one) to refresh the cache.
+    const target = navigator.serviceWorker.controller || reg.active || reg.waiting || reg.installing;
+    if (target) {
+      target.postMessage({ type: 'REFRESH_CACHE' });
+    } else {
+      status.textContent = 'Nová verze je připravena. Zavřete a znovu otevřete aplikaci.';
+      btn.disabled = false;
+    }
+
+    // Safety fallback: if no confirmation arrives in 8s, reload anyway.
+    setTimeout(() => { location.reload(); }, 8000);
+  } catch (e) {
+    status.textContent = 'Kontrolu se nepodařilo provést.';
+    btn.disabled = false;
+  }
+}
+
+// ─────────────────────────────────────────────
 //  CONFIRM MODAL
 // ─────────────────────────────────────────────
 function confirmDialog(message, okLabel = 'Smazat') {
@@ -1665,7 +1893,22 @@ window.addEventListener('DOMContentLoaded', () => {
     enableTabs(); updateHeaderPhase('Souboje'); switchTab('matches');
   }
   initPWA();
+  requestPersistentStorage();
 });
+
+// ─────────────────────────────────────────────
+//  Ask the browser to keep our data persistent (best-effort).
+//  Safe everywhere: feature-detected and wrapped in try/catch, so it
+//  silently does nothing on file:// or unsupported browsers.
+// ─────────────────────────────────────────────
+async function requestPersistentStorage() {
+  try {
+    if (navigator.storage && navigator.storage.persist) {
+      const already = await navigator.storage.persisted();
+      if (!already) await navigator.storage.persist();
+    }
+  } catch (e) {}
+}
 
 // ─────────────────────────────────────────────
 //  PWA — only active when served over https (e.g. GitHub Pages).
